@@ -25,8 +25,8 @@ $students=$stmt->fetchAll(PDO::FETCH_ASSOC);
         <td><?= $student ['email'] ?></td>
         <td><?= $student ['phone'] ?></td>
         <td> 
-            <a href="edit.php?id=<?=$student['id']?>"> edit </a> 
-            <a href="delete.php?id=<?=$student['id']?>" onclick= "return confirm('are you sure to delete');" > delete </a> 
+            <a href="edit.php?id=<?=$student['id']?>"> edit </a> <br>
+            <a href="delete.php?id=<?=$student['id']?>" onclick= "return confirm('are you sure to delete');" > delete  </a> 
     </td>
     </tr>
 <?php endforeach; ?>
