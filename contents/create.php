@@ -2,53 +2,64 @@
 include "config.php";
 
 $errors = [];
-$name = $email = $phone = $departmentId = "" ;
+$imageName = null;
+$name = $email = $phone = $departmentId = "";
 
 $stmt = $connection->prepare("SELECT * FROM departments");
 $stmt->execute();
 $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if (isset($_POST['submit'])){
+if (isset($_POST['submit'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $departmentId = trim($_POST['department_id']);
 
-    if($name == ""){
+    if ($name == "") {
         $errors[] = "name filed is required";
     }
-    if ($email == ""){
+    if ($email == "") {
         $errors[] = "email filed is required";
-    } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "invalid email format";
     }
 
-    if($email != ""){
+    if ($email != "") {
         $stmt = $connection->prepare("SELECT email from students where email = '$email'");
         $stmt->execute();
-        if($stmt->fetch()){
+        if ($stmt->fetch()) {
             $errors[] = "email aready exist";
         }
     }
 
-    if ($departmentId == ""){
-        $errors[] = "departmentId filed is required";
-    }
 
-    if($phone != ""){
+    if ($phone != "") {
         $stmt = $connection->prepare("SELECT phone from students where phone = '$phone'");
         $stmt->execute();
-        if($stmt->fetch()){
+        if ($stmt->fetch()) {
             $errors[] = "phone aready exist";
         }
     }
 
-    //// لما يعدي كل الي فوق
-    if (empty($errors)){
-        // **هنا المشكلة كانت** تمسح القيم → احذف السطر ده:
-        // $name = $email = $phone = $departmentId = "" ;
+    if ($departmentId == "") {
+        $errors[] = "departmentId filed is required";
+    }
 
-        $stmt = $connection->prepare("INSERT INTO students (name, email, phone, department_id) VALUES ('$name', '$email','$phone','$departmentId')");
+    if ($phone == "") {
+        $phone = null;
+    }
+
+    if (!empty($_FILES['image']['name'])) {
+        $imageName = time() . $_FILES['image']['name'];
+        $imagePath= "uploads/" . $imageName ;
+        move_uploaded_file($_FILES['image']['tmp_name'], $imagePath );
+    }
+
+
+    //// لما يعدي كل الي فوق
+    if (empty($errors)) {
+
+        $stmt = $connection->prepare("INSERT INTO students (name, email, phone, department_id, image) VALUES ('$name', '$email','$phone','$departmentId', '$imagePath')");
         $stmt->execute();
         header("location: index.php");
         exit;
@@ -59,17 +70,17 @@ if (isset($_POST['submit'])){
 <h3>Add Student</h3>
 
 <?php
-if(!empty($errors) ){
-    foreach($errors as $error){
+if (!empty($errors)) {
+    foreach ($errors as $error) {
         echo "<div class='alert alert-danger'>$error</div>";
     }
 }
 ?>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     <div class="form-group">
         <label>Name <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" name="name" placeholder=" Enter your name"  value="<?= htmlspecialchars($name) ?>">
+        <input type="text" class="form-control" name="name" placeholder=" Enter your name" value="<?= htmlspecialchars($name) ?>">
     </div>
 
     <div class="form-group">
@@ -91,6 +102,14 @@ if(!empty($errors) ){
             <?php endforeach ?>
         </select>
     </div>
+
+
+
+    <div class="form-group">
+        <label>image</label>
+        <input type="file" class="form-control" name="image">
+    </div>
+
 
     <button type="submit" class="btn btn-primary" name="submit">Submit</button>
 </form>
