@@ -10,7 +10,7 @@ $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }
 
 
-catch(PDOException $e){
+catch(PDOExceeption $e){
     
  die("connection failed : ". $e->getMessage());
 
